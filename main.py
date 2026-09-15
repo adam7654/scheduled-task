@@ -15,7 +15,7 @@ load_dotenv()
 ACCOUNT_SID = str(os.getenv("ACCOUNT_SID"))
 AUTH_TOKEN = str(os.getenv("AUTH_TOKEN"))
 
-
+print(f"set: {ACCOUNT_SID != 'None'}, starts AC: {ACCOUNT_SID.startswith('AC')}, len: {len(ACCOUNT_SID)}")
 
 OWM_Endpoint = "https://api.openweathermap.org/data/2.5/forecast"
 APIKEY = "55eb1e68f4406b845475807e659159c5"
