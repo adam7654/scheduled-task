@@ -6,33 +6,44 @@
 # See the solution video in the 100 Days of Python Course for explainations.
 
 
-from datetime import datetime
-import pandas
-import random
-import smtplib
+import requests
+from twilio.rest import Client
+
 import os
+from dotenv import load_dotenv
+load_dotenv()
+ACCOUNT_SID = str(os.getenv("ACCOUNT_SID"))
+AUTH_TOKEN = str(os.getenv("AUTH_TOKEN"))
 
-# import os and use it to get the Github repository secrets
-MY_EMAIL = os.environ.get("MY_EMAIL")
-MY_PASSWORD = os.environ.get("MY_PASSWORD")
 
-today = datetime.now()
-today_tuple = (today.month, today.day)
 
-data = pandas.read_csv("birthdays.csv")
-birthdays_dict = {(data_row["month"], data_row["day"])                  : data_row for (index, data_row) in data.iterrows()}
-if today_tuple in birthdays_dict:
-    birthday_person = birthdays_dict[today_tuple]
-    file_path = f"letter_templates/letter_{random.randint(1, 3)}.txt"
-    with open(file_path) as letter_file:
-        contents = letter_file.read()
-        contents = contents.replace("[NAME]", birthday_person["name"])
+OWM_Endpoint = "https://api.openweathermap.org/data/2.5/forecast"
+APIKEY = "55eb1e68f4406b845475807e659159c5"
 
-    with smtplib.SMTP("YOUR EMAIL PROVIDER SMTP SERVER ADDRESS") as connection:
-        connection.starttls()
-        connection.login(MY_EMAIL, MY_PASSWORD)
-        connection.sendmail(
-            from_addr=MY_EMAIL,
-            to_addrs=birthday_person["email"],
-            msg=f"Subject:Happy Birthday!\n\n{contents}"
-        )
+#London: lat 51.507351, lon -0.127758
+#Bristol: lat 51.455311, lon -2.591900
+WEATHER_PARAMS = {
+    "lat": 51.455311,
+    "lon": -2.591900,
+    "cnt": 4,
+    "appid": APIKEY
+}
+
+response = requests.get(OWM_Endpoint, params=WEATHER_PARAMS)
+response.raise_for_status()
+
+weather_data = response.json()
+
+will_rain = False
+for current_dict in weather_data["list"]:
+    condition_id = current_dict["weather"][0]["id"]
+    if int(condition_id) < 700:
+        will_rain = True
+if will_rain:
+    client = Client(ACCOUNT_SID, AUTH_TOKEN)
+    message = client.messages.create(
+        body="sms_account_alerts",
+        from_="+447460077297",
+        to="+447756913612"
+    )
+    print(message.status)
