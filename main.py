@@ -41,9 +41,15 @@ for current_dict in weather_data["list"]:
         will_rain = True
 if will_rain:
     client = Client(ACCOUNT_SID, AUTH_TOKEN)
-    message = client.messages.create(
-        body="sms_account_alerts",
-        from_="+447460077297",
+    message1 = client.messages.create(
+        body="It will rain! Bring an umbrella!",
+        from_="+447450317827",
         to="+447756913612"
     )
-    print(message.status)
+else:
+    client = Client(ACCOUNT_SID, AUTH_TOKEN)
+    message2 = client.messages.create(
+        body="No rain today :)",
+        from_="+447450317827",
+        to="+447756913612"
+    )
